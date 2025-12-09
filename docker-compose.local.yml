@@ -26,7 +26,8 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
 
   storage:
-    image: docker pull ghcr.io/witelokk-study/image-hosting-storage:main
+    build:
+      context: ./services/storage
     environment:
       STORAGE_DATABASE_URL: postgresql+asyncpg://storage:storage@postgres:5432/storage
       STORAGE_MINIO_ENDPOINT: minio:9000
@@ -46,7 +47,8 @@ services:
     restart: unless-stopped
 
   preview:
-    image: docker pull ghcr.io/witelokk-study/image-hosting-preview:main
+    build:
+      context: ./services/preview
     environment:
       PREVIEW_MINIO_ENDPOINT: minio:9000
       PREVIEW_MINIO_ACCESS_KEY: minioadmin
@@ -62,7 +64,8 @@ services:
     restart: unless-stopped
 
   gateway:
-    image: docker pull ghcr.io/witelokk-study/image-hosting-gateway:main
+    build:
+      context: ./services/gateway
     environment:
       GATEWAY_STORAGE_BASE_URL: http://storage:8000
     depends_on:
@@ -72,7 +75,8 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: docker pull ghcr.io/witelokk-study/image-hosting-frontend:main
+    build:
+      context: ./services/frontend
     environment:
       API_BASE_URL: /api
     ports:
