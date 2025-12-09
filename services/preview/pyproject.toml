@@ -1,0 +1,22 @@
+[project]
+name = "preview"
+version = "0.1.0"
+description = "Image preview worker"
+authors = [
+    {name = "witelokk", email = "witelokk@gmail.com"}
+]
+requires-python = ">=3.14,<4.0"
+dependencies = [
+    "aio-pika (>=9.4.1,<10.0.0)",
+    "minio (>=7.2.7,<8.0.0)",
+    "pillow (>=10.4.0,<11.0.0)",
+    "pydantic-settings (>=2.6.1,<3.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "preview", from = "src"}]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
