@@ -1,19 +1,27 @@
 [project]
 name = "storage"
 version = "0.1.0"
-description = ""
+description = "storage"
 authors = [
     {name = "witelokk",email = "witelokk@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.14,<4.0"
 dependencies = [
     "fastapi (>=0.124.0,<0.125.0)",
-    "uvicorn[standard] (>=0.38.0,<0.39.0)"
+    "uvicorn[standard] (>=0.38.0,<0.39.0)",
+    "sqlalchemy[asyncio] (>=2.0.0,<3.0.0)",
+    "asyncpg (>=0.29.0,<0.30.0)",
+    "minio (>=7.2.7,<8.0.0)",
+    "aio-pika (>=9.4.1,<10.0.0)",
+    "python-multipart (>=0.0.9,<0.1.0)",
+    "pydantic-settings (>=2.6.1,<3.0.0)"
 ]
 
 [tool.poetry]
 packages = [{include = "storage", from = "src"}]
+package-mode = false
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
