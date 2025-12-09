@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from uuid import UUID, uuid4
 
@@ -67,6 +67,8 @@ async def upload_image_endpoint(
         content_type=file.content_type,
         size_bytes=size_bytes,
         created_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc)
+        + timedelta(seconds=settings.image_ttl_seconds),
     )
 
     repo = ImageRepository(session)
@@ -88,6 +90,7 @@ async def upload_image_endpoint(
             "content_type": saved.content_type,
             "size_bytes": saved.size_bytes,
             "created_at": saved.created_at.isoformat(),
+            "expires_at": saved.expires_at.isoformat(),
         }
     )
 

@@ -5,6 +5,7 @@ from typing import AsyncIterator
 from uuid import UUID
 
 from minio import Minio
+from minio.error import S3Error
 from starlette.concurrency import run_in_threadpool
 
 from ..settings import get_settings
@@ -76,3 +77,50 @@ def build_preview_name(object_name: str, size: int) -> str:
     suffix = path.suffix or ""
     stem = path.stem or "image"
     return f"{stem}_{size}{suffix}"
+
+
+async def delete_object(bucket: str, object_name: str) -> None:
+    try:
+        await run_in_threadpool(minio_client.remove_object, bucket, object_name)
+    except S3Error as exc:
+        if exc.code == "NoSuchKey":
+            log.info("Object %s/%s already removed", bucket, object_name)
+            return
+        log.error("Failed to remove %s/%s: %s", bucket, object_name, exc)
+        raise
+    except Exception as exc:
+        log.error("Failed to remove %s/%s: %s", bucket, object_name, exc)
+        raise
+
+
+async def delete_previews(object_name: str) -> None:
+    prefix = f"{Path(object_name).stem}_"
+    try:
+        objects = await run_in_threadpool(
+            lambda: list(
+                minio_client.list_objects(
+                    settings.preview_bucket, prefix=prefix, recursive=False
+                )
+            )
+        )
+        for obj in objects:
+            await run_in_threadpool(
+                minio_client.remove_object,
+                settings.preview_bucket,
+                obj.object_name,
+            )
+    except S3Error as exc:
+        if exc.code == "NoSuchBucket":
+            log.warning(
+                "Preview bucket %s missing; skipping preview cleanup",
+                settings.preview_bucket,
+            )
+            return
+        if exc.code == "NoSuchKey":
+            log.info("Previews for %s already removed", object_name)
+            return
+        log.error("Failed to remove previews for %s: %s", object_name, exc)
+        raise
+    except Exception as exc:
+        log.error("Failed to remove previews for %s: %s", object_name, exc)
+        raise

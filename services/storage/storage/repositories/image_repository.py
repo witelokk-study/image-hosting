@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -19,3 +20,13 @@ class ImageRepository:
     async def get(self, image_id: UUID) -> Image | None:
         result = await self.session.execute(select(Image).where(Image.id == image_id))
         return result.scalar_one_or_none()
+
+    async def list_expired(self, now: datetime) -> list[Image]:
+        result = await self.session.execute(
+            select(Image).where(Image.expires_at <= now)
+        )
+        return list(result.scalars().all())
+
+    async def delete(self, image: Image) -> None:
+        await self.session.delete(image)
+        await self.session.commit()

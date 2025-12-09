@@ -12,6 +12,7 @@ class ImageResponse(BaseModel):
     content_type: str
     size_bytes: int
     created_at: datetime
+    expires_at: datetime
 
     class Config:
         from_attributes = True

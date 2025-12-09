@@ -21,6 +21,8 @@ class Settings(BaseSettings):
         "image/webp",
         "image/bmp",
     ]
+    image_ttl_seconds: int = 24 * 60 * 60
+    cleanup_interval_seconds: int = 5 * 60
 
     class Config:
         env_prefix = "STORAGE_"
@@ -30,6 +32,13 @@ class Settings(BaseSettings):
     def split_content_types(cls, value: str | List[str]) -> List[str]:
         if isinstance(value, str):
             return [item.strip() for item in value.split(",") if item.strip()]
+        return value
+
+    @field_validator("image_ttl_seconds", "cleanup_interval_seconds")
+    @classmethod
+    def validate_positive(cls, value: int) -> int:
+        if value <= 0:
+            raise ValueError("Must be a positive integer")
         return value
 
 
