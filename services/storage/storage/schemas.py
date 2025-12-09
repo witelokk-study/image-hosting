@@ -7,6 +7,8 @@ from pydantic import BaseModel
 class ImageResponse(BaseModel):
     id: UUID
     original_filename: str
+    object_name: str
+    bucket: str
     content_type: str
     size_bytes: int
     created_at: datetime

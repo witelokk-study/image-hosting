@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     minio_access_key: str
     minio_secret_key: str
     minio_bucket: str = "images"
+    preview_bucket: str = "preview"
     minio_secure: bool = False
     rabbitmq_url: str = "amqp://guest:guest@localhost/"
     allowed_content_types: List[str] = [

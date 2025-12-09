@@ -69,3 +69,10 @@ async def stream_image(
 def build_object_name(image_id: UUID, filename: str | None) -> str:
     suffix = Path(filename or "").suffix
     return f"{image_id}{suffix}"
+
+
+def build_preview_name(object_name: str, size: int) -> str:
+    path = Path(object_name)
+    suffix = path.suffix or ""
+    stem = path.stem or "image"
+    return f"{stem}_{size}{suffix}"

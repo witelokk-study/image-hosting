@@ -1,0 +1,23 @@
+[project]
+name = "gateway"
+version = "0.1.0"
+description = "Public API gateway for the image hosting services"
+authors = [
+    {name = "witelokk", email = "witelokk@gmail.com"}
+]
+requires-python = ">=3.14,<4.0"
+dependencies = [
+    "fastapi (>=0.124.0,<0.125.0)",
+    "uvicorn[standard] (>=0.38.0,<0.39.0)",
+    "httpx (>=0.27.0,<0.28.0)",
+    "pydantic-settings (>=2.6.1,<3.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)"
+]
+
+[tool.poetry]
+packages = [{include = "gateway", from = "src"}]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -6,7 +6,14 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..clients.minio_client import build_object_name, stream_image, upload_image
+from minio.error import S3Error
+
+from ..clients.minio_client import (
+    build_object_name,
+    build_preview_name,
+    stream_image,
+    upload_image,
+)
 from ..db import get_session
 from ..messaging import publish_image_uploaded
 from ..models import Image
@@ -120,3 +127,37 @@ async def download_image(
         headers["Content-Length"] = str(record.size_bytes)
 
     return StreamingResponse(stream, media_type=record.content_type, headers=headers)
+
+
+@router.get("/images/{image_id}/preview/{size}")
+async def download_preview(
+    image_id: UUID, size: int, session: Annotated[AsyncSession, Depends(get_session)]
+) -> StreamingResponse:
+    repo = ImageRepository(session)
+    record = await repo.get(image_id)
+    if record is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Image not found"
+        )
+
+    preview_name = build_preview_name(record.object_name, size)
+
+    try:
+        stream = await stream_image(settings.preview_bucket, preview_name)
+    except S3Error as exc:
+        if exc.code == "NoSuchKey":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Preview not found"
+            ) from exc
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Failed to fetch preview from storage",
+        ) from exc
+
+    headers = {"Content-Disposition": f'inline; filename="{preview_name}"'}
+
+    return StreamingResponse(
+        stream,
+        media_type=record.content_type or "application/octet-stream",
+        headers=headers,
+    )
