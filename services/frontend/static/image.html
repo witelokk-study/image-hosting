@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Hosting – Image</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/config.js"></script>
+    <script type="module" src="/image.js"></script>
+</head>
+
+<body class="page">
+    <header class="hero">
+        <p class="hero__eyebrow">Image Hosting</p>
+        <h1 class="hero__title">Your image</h1>
+        <p class="hero__subtitle">Preview and grab download links.</p>
+    </header>
+
+    <main class="card card--raised">
+        <section id="imageSection" class="image-view">
+            <div class="image-view__preview" id="previewContainer">
+                <img id="previewImage" alt="Preview" class="image-view__img" hidden>
+                <p id="previewFallback" class="muted">Loading preview...</p>
+            </div>
+            <div class="image-view__meta">
+                <p class="meta__item"><strong>Filename:</strong> <span id="fileName">—</span></p>
+                <p class="meta__item"><strong>Type:</strong> <span id="contentType">—</span></p>
+                <p class="meta__item"><strong>Size:</strong> <span id="fileSize">—</span></p>
+                <div class="actions">
+                    <a id="downloadOriginal" class="btn btn--primary" target="_blank" rel="noopener">Download
+                        original</a>
+                    <a class="btn btn--ghost" href="/" aria-label="Upload another">Upload another</a>
+                </div>
+                <div class="previews">
+                    <h2 class="previews__title">Scaled versions</h2>
+                    <div class="previews__links" id="previewLinks"></div>
+                </div>
+            </div>
+        </section>
+        <section id="errorSection" class="error hidden">
+            <h2>Something went wrong</h2>
+            <p id="errorText"></p>
+            <a class="btn btn--ghost" href="/">Back to upload</a>
+        </section>
+    </main>
+</body>
+
+</html>
