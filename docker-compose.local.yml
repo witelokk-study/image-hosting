@@ -39,6 +39,8 @@ services:
       STORAGE_RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       STORAGE_IMAGE_TTL_SECONDS: 2628000 # 1 month
       STORAGE_CLEANUP_INTERVAL_SECONDS: 300
+    ports:
+      - "8000:8000"
 
     depends_on:
       - postgres
