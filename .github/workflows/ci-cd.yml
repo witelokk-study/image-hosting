@@ -1,6 +1,7 @@
 name: Docker
 
 on:
+  workflow_dispatch:
   push:
     branches: ["main"]
     tags: ["v*.*.*"]
@@ -8,8 +9,9 @@ on:
     branches: ["main"]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  REGISTRY_NAMESPACE: ${{ secrets.DOCKER_NAMESPACE }}
+  IMAGE_NAME: image-hosting
 
 jobs:
   test:
@@ -95,14 +97,14 @@ jobs:
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
+          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -155,3 +157,25 @@ jobs:
         if: always()
         run: |
           docker compose -f docker-compose.local.yml down -v
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [frontend, gateway, preview, storage]
+
+    steps:
+      - name: Deploy serverless container
+        uses: yc-actions/yc-sls-container-deploy@v1
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_KEYS }}
+          container-name: ${{ secrets[format('YC_CONTAINER_NAME_{0}', matrix.service)] }}
+          folder-id: ${{ secrets.YC_FOLDER_ID }}
+          revision-image-url: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}:latest
+          revision-service-account-id: ${{ secrets.YC_SA_ID }}
+          revision-env: |
+            AMQP_URL=${{ secrets.ENV_AMQP_URL }}
+            POSTGRES_URL=${{ secrets.ENV_POSTGRES_URL }}
